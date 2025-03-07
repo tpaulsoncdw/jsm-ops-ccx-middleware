@@ -1,0 +1,50 @@
+{
+  "name": "jira-oncall-api",
+  "version": "1.0.0",
+  "description": "RESTful web service wrapper for Jira Service Manager on-call schedules.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "NODE_ENV=production node server.js",
+    "dev": "NODE_ENV=development nodemon server.js",
+    "prod": "NODE_ENV=production node server.js"
+  },
+  "type": "module",
+  "author": "TJ Paulson <tj.paulson@cdw.com> (https://www.cdw.com)",
+  "contributors": [],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tpaulsoncdw/jsm-ops-ccx-middleware.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tpaulsoncdw/jsm-ops-ccx-middleware/issues"
+  },
+  "homepage": "https://github.com/tpaulsoncdw/jsm-ops-ccx-middleware#readme",
+  "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "keywords": [
+    "jira",
+    "on-call",
+    "service-manager",
+    "middleware",
+    "cisco",
+    "phone"
+  ],
+  "dependencies": {
+    "boxen": "^8.0.1",
+    "chalk": "^5.4.1",
+    "cli-cursor": "^5.0.0",
+    "csv-parse": "^5.6.0",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mssql": "^11.0.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
