@@ -9,7 +9,8 @@ const config = {};
 config.server = {};
 config.server.port = process.env.PORT || 3100;
 // Derive SERVER_URL from PORT if not explicitly set (to avoid duplicated port configuration)
-config.server.url = process.env.SERVER_URL || `http://localhost:${config.server.port}`;
+config.server.url =
+  process.env.SERVER_URL || `http://localhost:${config.server.port}`;
 
 // Jira Service Manager API configuration
 config.jira = {};
@@ -25,7 +26,8 @@ config.sql.server = process.env.SQL_SERVER || "localhost";
 config.sql.database = process.env.SQL_DATABASE;
 config.sql.port = parseInt(process.env.SQL_PORT || "1433");
 config.sql.encrypt = process.env.SQL_ENCRYPT === "true";
-config.sql.trustServerCertificate = process.env.SQL_TRUST_SERVER_CERT === "true";
+config.sql.trustServerCertificate =
+  process.env.SQL_TRUST_SERVER_CERT === "true";
 config.sql.table = process.env.SQL_TABLE || "dbo.PhoneDirectory";
 
 // Authentication mode: 'windows' or 'sql'

@@ -252,7 +252,7 @@ app.get("/test", async function (req, res) {
 
     // Mask all but last 4 digits for privacy in logs
     const maskedNumber = `****${testNumber.slice(-4)}`;
-    
+
     dashboard.logger.success(`Test endpoint response ready`, {
       requestId: req.id,
       number: maskedNumber, // Only log last 4 digits for privacy

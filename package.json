@@ -1,6 +1,6 @@
 {
   "name": "jira-oncall-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "RESTful web service wrapper for Jira Service Manager on-call schedules.",
   "main": "server.js",
   "scripts": {

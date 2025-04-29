@@ -70,7 +70,8 @@ async function fetchSchedules() {
 
     return data.values;
   } catch (error) {
-    console.error("Error fetching schedules from Jira:", error.message);
+    const sanitizedMessage = error.message.replace(/[\r\n]/g, " ");
+    console.error("Error fetching schedules from Jira:", sanitizedMessage);
     throw error;
   }
 }
@@ -88,17 +89,19 @@ async function main() {
 
     // Display all schedules with their IDs
     schedules.forEach((schedule, index) => {
-      console.log(`${index + 1}. ID: ${schedule.id}`);
-      console.log(`   Name: "${schedule.name}"`);
-      console.log(`   Description: ${schedule.description || "N/A"}`);
-      console.log(`   Time Zone: ${schedule.timezone || "N/A"}`);
+      const sanitize = (str) => str.replace(/[\r\n]/g, " ").replace(/["']/g, "");
+      console.log(`${index + 1}. ID: ${sanitize(schedule.id)}`);
+      console.log(`   Name: "${sanitize(schedule.name)}"`);
+      console.log(`   Description: ${sanitize(schedule.description || "N/A")}`);
+      console.log(`   Time Zone: ${sanitize(schedule.timezone || "N/A")}`);
       console.log(``);
     });
 
     // Show summarized list for easy reference
     console.log("=== SCHEDULE NAMES (SIMPLE LIST) ===");
     schedules.forEach((schedule, index) => {
-      console.log(`${index + 1}. "${schedule.name}"`);
+      const sanitizedScheduleName = schedule.name.replace(/[\r\n]/g, " ").replace(/["']/g, "");
+      console.log(`${index + 1}. "${sanitizedScheduleName}"`);
     });
 
     // Help with matching to endpoints
@@ -124,12 +127,14 @@ async function main() {
       );
 
       if (potentialMatches.length > 0) {
-        console.log(`Endpoint "/${endpoint}" might match these schedules:`);
+        const sanitizedEndpoint = endpoint.replace(/[\r\n]/g, " ").replace(/["']/g, "");
+        console.log(`Endpoint "/${sanitizedEndpoint}" might match these schedules:`);
         potentialMatches.forEach((match) => {
           console.log(`  - "${match.name}"`);
         });
       } else {
-        console.log(`No potential matches found for endpoint "/${endpoint}"`);
+        const sanitizedEndpoint = endpoint.replace(/[\r\n]/g, " ").replace(/["']/g, "");
+        console.log(`No potential matches found for endpoint "/${sanitizedEndpoint}"`);
       }
       console.log(``);
     });

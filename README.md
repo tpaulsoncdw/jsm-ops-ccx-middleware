@@ -68,6 +68,9 @@ JIRA_HOST_URL=https://your_jira_host
 JIRA_BASE_PATH=rest/servicedeskapi
 JIRA_DOMAIN=your-domain.atlassian.net
 
+# Timezone for on-call schedule logic
+TIME_ZONE=America/Chicago
+
 # SQL Database Configuration - Common Settings
 SQL_SERVER=your_sql_server
 SQL_DATABASE=your_database

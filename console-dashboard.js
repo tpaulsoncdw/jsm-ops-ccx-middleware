@@ -207,7 +207,9 @@ const logger = {
             2
           );
       } catch (e) {
-        dataStr = ": [Complex Object]";
+        // Log the stringify error
+        console.error(`Error stringifying data for info log: ${e.message}`);
+        dataStr = ": [Error serializing data]";
       }
     }
 
@@ -233,7 +235,8 @@ const logger = {
       try {
         dataStr = ": " + JSON.stringify(data);
       } catch (e) {
-        dataStr = ": [Complex Object]";
+        console.error(`Error serializing data for success log: ${e.message}`);
+        dataStr = ": [Error serializing data]";
       }
     }
 
@@ -259,6 +262,7 @@ const logger = {
       try {
         dataStr = ": " + JSON.stringify(data);
       } catch (e) {
+        console.error(`Error serializing data for warning log: ${e.message}`);
         dataStr = ": [Complex Object]";
       }
     }
@@ -288,6 +292,7 @@ const logger = {
         try {
           errorStr = ": " + JSON.stringify(error);
         } catch (e) {
+          console.error(`Error serializing error object: ${e.message}`);
           errorStr = ": [Complex Error Object]";
         }
       }

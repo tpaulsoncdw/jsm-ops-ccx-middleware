@@ -51,7 +51,7 @@ let phoneDataCache = null;
 let phoneDataExpiry = null;
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
-// Connection pool
+// Connection pool - initialized once and reused
 let pool = null;
 
 /**
@@ -96,11 +96,10 @@ async function getPhoneNumberByEmail(email, callback) {
     }
 
     logInfo(`Phone data cache has ${phoneDataCache.length} records`);
+    // Only log sample if there are records
     if (phoneDataCache.length > 0) {
-      const sample = phoneDataCache.slice(
-        0,
-        Math.min(2, phoneDataCache.length)
-      );
+      const sampleSize = Math.min(2, phoneDataCache.length);
+      const sample = phoneDataCache.slice(0, sampleSize);
       logInfo("Sample of phone data cache", sample);
     }
 
@@ -164,7 +163,10 @@ async function ensurePhoneDataLoaded() {
     const api = await import("./ops-jira-api.js");
     _forceRefresh = api.default.forceRefresh;
   } catch (err) {
-    // Ignore error - just use local flag
+    logWarning(
+      "Could not import ops-jira-api.js, using local refresh flag",
+      err
+    );
   }
 
   if (
@@ -218,11 +220,13 @@ async function fetchPhoneData() {
         logInfo(`CSV file content length: ${csvText.length} characters`);
         logInfo(`CSV preview: ${csvText.substring(0, 200)}...`);
 
-        // Parse CSV
+        // Parse CSV with optimized settings
         const records = parse(csvText, {
           columns: true,
           skip_empty_lines: true,
           trim: true,
+          skip_records_with_empty_values: true,
+          skip_lines_with_error: true,
         });
 
         logInfo(`Parsed ${records.length} records from CSV`);
@@ -330,9 +334,13 @@ async function isHealthy() {
       } else {
         logWarning(`Temp file does not exist: ${tempFile}`);
       }
+      const fsPromises = fs.promises;
+      await fsPromises.access(tempFile);
+      logInfo("Temp file exists, considering service healthy");
+      return true;
     } catch (err) {
       logWarning("Error checking temp file", err);
-      // Fall through to SQL check
+      return false; // Return false on error checking temp file
     }
   }
 
@@ -360,24 +368,31 @@ async function isHealthy() {
     }
   } else {
     logWarning("SQL configuration incomplete, cannot check database health");
+    logError("An error occurred during the health check", err);
+    return false;
   }
-
-  return false;
 }
 
 /**
  * Close the SQL connection pool
+ *
+ * @returns {Promise<boolean>} True if closed successfully, false otherwise
  */
 async function closePool() {
-  if (pool) {
-    try {
-      logInfo("Closing SQL connection pool");
-      await pool.close();
-      logInfo("SQL connection pool closed successfully");
-      pool = null;
-    } catch (err) {
-      logError("Error closing SQL connection pool", err);
-    }
+  if (!pool) {
+    logInfo("No active pool to close");
+    return true;
+  }
+
+  try {
+    logInfo("Closing SQL connection pool");
+    await pool.close();
+    logInfo("SQL connection pool closed successfully");
+    pool = null;
+    return true;
+  } catch (err) {
+    logError("Error closing SQL connection pool", err);
+    return false;
   }
 }
 
@@ -389,12 +404,14 @@ process.on("SIGTERM", async () => {
 
 process.on("SIGINT", async () => {
   logInfo("SIGINT received, closing pool");
-  await closePool();
+  const closed = await closePool();
+  logInfo(`Pool closed successfully: ${closed}`);
   process.exit(0);
 });
 
 // Module exports
 export default {
-  getPhoneNumberByEmail,
-  isHealthy,
+  getPhoneNumberByEmail: getPhoneNumberByEmail,
+  isHealthy: isHealthy,
+  closePool: closePool, // Export for external graceful shutdown
 };

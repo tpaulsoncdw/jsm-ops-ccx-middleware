@@ -11,18 +11,25 @@ import fetch from "node-fetch";
 import sql from "mssql";
 import dashboard from "./console-dashboard.js";
 import config from "./config.js";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc.js";
+import timezone from "dayjs/plugin/timezone.js";
 
-// Cache for responses to minimize API calls and database connections
+// Initialize the plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// Initialize caches with default TTL (time-to-live) values
 const cache = {
   schedules: {
     data: null,
     expiry: null,
-    duration: 15 * 60 * 1000, // 15 minutes
+    duration: 15 * 60 * 1000, // 15 minutes in milliseconds
   },
   phoneData: {
     data: null,
     expiry: null,
-    duration: 60 * 60 * 1000, // 1 hour
+    duration: 60 * 60 * 1000, // 1 hour in milliseconds
   },
 };
 
@@ -218,11 +225,9 @@ async function getOnCallUser(scheduleId, requestId) {
   const JIRA_BASE_PATH = config.jira.basePath;
   const JIRA_DOMAIN = process.env.JIRA_DOMAIN;
 
-  // Generate today's date at midnight UTC in ISO 8601 format
-  const now = new Date();
-  const todayISO = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  ).toISOString();
+
+  const timeZone = process.env.TIME_ZONE || "America/Chicago"; // Default to Chicago if not specified
+  const todayISO = dayjs().tz(timeZone).format();
 
   // Build auth header
   const auth =
@@ -409,7 +414,9 @@ async function getPhoneNumberByEmail(email, requestId) {
 
   // Log connection attempt (without sensitive info)
   const redactedConfig = { ...sqlConfig };
-  if (redactedConfig.password) redactedConfig.password = "********";
+  const REDACTED_PASSWORD_PLACEHOLDER = "********";
+  if (redactedConfig.password)
+    redactedConfig.password = REDACTED_PASSWORD_PLACEHOLDER;
 
   dashboard.logger.info(
     `Attempting SQL connection to ${sqlConfig.server}:${sqlConfig.port}/${sqlConfig.database}`,
@@ -555,7 +562,8 @@ export default {
       dashboard.logger.error(`Error during SQL connection cleanup`, {
         error: error.message,
       });
-      return false;
+      // Re-throw the error to allow higher-level handlers to catch it
+      throw error;
     }
   },
 };
